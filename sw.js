@@ -1,4 +1,4 @@
-const C="trener-v1";const F=["./","index.html","data.json","manifest.webmanifest","icon-192.png"];
+const C="trener-v2";const F=["./","index.html","data.json","manifest.webmanifest","icon-192.png"];
 self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>c.addAll(F)))});
 self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));
 // Сначала сеть (чтобы план от тренера обновлялся), без сети — из кэша

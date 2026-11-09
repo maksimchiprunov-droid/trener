@@ -101,6 +101,10 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 .close{align-self:flex-end;border:0;background:var(--bg);color:var(--fg);border-radius:99px;width:36px;height:36px;font-size:20px;cursor:pointer}
 .btn{margin-top:10px;width:100%;border:0;border-radius:12px;padding:12px;background:var(--accent);color:var(--accent-ink);font:600 15px var(--f-body);cursor:pointer}
 #reptext{margin-top:10px;width:100%;min-height:180px;border:1px solid var(--line);border-radius:10px;padding:10px;font:13px var(--f-mono);background:var(--bg);color:var(--fg)}
+.vid{display:block;text-align:center;text-decoration:none;margin-top:0}
+.rec summary{list-style:none;cursor:pointer}.rec summary::-webkit-details-marker{display:none}
+.rec summary h3::after{content:" ›";color:var(--accent)}.rec[open] summary h3::after{content:" ⌄"}
+.rec ol{margin:10px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15px}
 .state{color:var(--muted);text-align:center;padding:40px 10px}
 @media (prefers-reduced-motion:no-preference){.item,.chk{transition:background .15s,border-color .15s}}
 </style>
@@ -124,7 +128,7 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 <script>
 const WD=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
 const WDL=["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"];
-const S={plan:null,ex:{},food:[],foodInfo:null,log:{},filter:"Все",failed:false};
+const S={recipes:[],plan:null,ex:{},food:[],foodInfo:null,log:{},filter:"Все",failed:false};
 try{S.log=JSON.parse(localStorage.getItem("trener-log")||"{}")}catch(e){S.log={}}
 function saveLog(){try{localStorage.setItem("trener-log",JSON.stringify(S.log))}catch(e){}}
 const $=s=>document.querySelector(s);
@@ -190,6 +194,10 @@ function vFood(){
   if(fi.likes||fi.dislikes)h+=`<div class="likes"><div class="plain"><span class="lbl">Люблю</span><ul>${(fi.likes||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div><div class="plain"><span class="lbl">Не трогаем</span><ul>${(fi.dislikes||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>`;
   for(const m of meals){const items=S.food.filter(f=>f.meal===m);if(!items.length)continue;
     h+=`<section class="food"><h2>${esc(m)}</h2>${items.map(f=>`<div class="fcard"><h3>${esc(f.name)}</h3><p>${esc(f.what||"")}</p></div>`).join("")}</section>`}
+  if(S.recipes.length){h+=`<section class="food"><h2>Рецепты для аэрогриля</h2>${fi.appliance?`<p style="margin:0;color:var(--muted);font-size:14px">${esc(fi.appliance)}</p>`:""}`;
+    for(const m of ["Завтрак","Обед","Ужин"]){const rs=S.recipes.filter(r=>r.meal===m);if(!rs.length)continue;h+=`<span class="lbl">${m}</span>`;
+      h+=rs.map(r=>`<details class="fcard rec"><summary><h3>${esc(r.name)}</h3><p>${esc(r.time)} · ${esc(r.short)}</p></summary><ol>${r.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>${r.tip?`<p><b>Совет:</b> ${esc(r.tip)}</p>`:""}</details>`).join("")}
+    h+=`</section>`}
   if(!S.food.length)h+=`<div class="state">Идеи еды скоро появятся.</div>`;
   $("#app").innerHTML=h+`</div>`;
 }
@@ -208,7 +216,7 @@ async function copyReport(){
 function openEx(id){
   const e=S.ex[id];if(!e)return;
   const li=a=>(a||[]).map(x=>`<li>${esc(x)}</li>`).join("");
-  $("#sheet").innerHTML=`<button class="close" aria-label="Закрыть" id="x">×</button><div><span class="lbl">${esc(e.group||"")}</span><h2 style="font-size:22px">${esc(e.name)}</h2></div><p style="margin:0;color:var(--muted)">${esc(e.short||"")}</p>${e.steps?`<div><h3>Как делать</h3><ol>${li(e.steps)}</ol></div>`:""}${e.dose?`<div class="dose"><span class="lbl">Сколько</span><div>${esc(e.dose)}</div></div>`:""}${e.mistakes?`<div><h3>Частые ошибки</h3><ul>${li(e.mistakes)}</ul></div>`:""}${e.easier?`<div><h3>Слишком тяжело?</h3><p style="margin:4px 0 0">${esc(e.easier)}</p></div>`:""}${e.harder?`<div><h3>Стало легко?</h3><p style="margin:4px 0 0">${esc(e.harder)}</p></div>`:""}`;
+  $("#sheet").innerHTML=`<button class="close" aria-label="Закрыть" id="x">×</button><div><span class="lbl">${esc(e.group||"")}</span><h2 style="font-size:22px">${esc(e.name)}</h2></div><p style="margin:0;color:var(--muted)">${esc(e.short||"")}</p>${e.steps?`<div><h3>Как делать</h3><ol>${li(e.steps)}</ol></div>`:""}${e.dose?`<div class="dose"><span class="lbl">Сколько</span><div>${esc(e.dose)}</div></div>`:""}${e.mistakes?`<div><h3>Частые ошибки</h3><ul>${li(e.mistakes)}</ul></div>`:""}${e.easier?`<div><h3>Слишком тяжело?</h3><p style="margin:4px 0 0">${esc(e.easier)}</p></div>`:""}${e.harder?`<div><h3>Стало легко?</h3><p style="margin:4px 0 0">${esc(e.harder)}</p></div>`:""}${e.video?`<a class="btn vid" href="${esc(e.video)}" target="_blank" rel="noopener">▶ Смотреть видео на YouTube</a>`:""}`;
   $("#x").onclick=()=>$("#dlg").close();$("#dlg").showModal();
 }
 document.addEventListener("click",ev=>{
@@ -226,7 +234,7 @@ window.addEventListener("hashchange",render);
 render();
 (async()=>{
   try{const r=await fetch("data.json",{cache:"no-cache"});const d=await r.json();
-    S.plan=d.plan;S.ex=d.exercises;S.food=d.meals.sort((a,b)=>a.order-b.order);S.foodInfo=d.food;S.failed=false}
+    S.plan=d.plan;S.ex=d.exercises;S.food=d.meals.sort((a,b)=>a.order-b.order);S.foodInfo=d.food;S.recipes=d.recipes||[];S.failed=false}
   catch(e){S.failed=true}
   render();
 })();
