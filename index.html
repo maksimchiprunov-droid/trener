@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Турник и Ко</title>
+<meta name="theme-color" content="#16191d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Турник и Ко">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+/* Layout: one narrow column like a phone app; sticky top header, bottom tab bar. Steel-black like the station frame, warm orange accent like a rubber grip. */
+:root{
+  --bg:#f3f4f6; --surface:#ffffff; --line:#dfe2e7; --fg:#16191d; --muted:#5d6570;
+  --accent:#e2621b; --accent-ink:#ffffff; --accent-soft:#fde9dc; --ok:#2f8a4e; --ok-soft:#e1f2e6;
+  --f-display:"Unbounded","Golos Text",system-ui,sans-serif;
+  --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111316; --surface:#1a1d21; --line:#2b3037; --fg:#eceef1; --muted:#9aa3ae;
+  --accent:#ff7a33; --accent-ink:#1a0c03; --accent-soft:#3a2416; --ok:#5cc47f; --ok-soft:#173022; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111316; --surface:#1a1d21; --line:#2b3037; --fg:#eceef1; --muted:#9aa3ae;
+  --accent:#ff7a33; --accent-ink:#1a0c03; --accent-soft:#3a2416; --ok:#5cc47f; --ok-soft:#173022; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 110px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:16px 10px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h1{font-family:var(--f-display);font-weight:700;font-size:20px;margin:0;letter-spacing:-.01em}
+h1 b{color:var(--accent)}
+.wk{font-family:var(--f-mono);font-size:12px;color:var(--muted);white-space:nowrap}
+h2{font-family:var(--f-display);font-weight:500;font-size:17px;margin:0;text-wrap:balance}
+h3{font-size:16px;margin:0;font-weight:600}
+.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.stack{display:flex;flex-direction:column;gap:14px}
+.hero{background:var(--fg);color:var(--bg);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.hero .lbl{color:inherit;opacity:.7}
+.hero h2{font-size:22px}
+.hero p{margin:0;opacity:.85}
+.dots{display:flex;gap:6px;margin-top:6px}
+.dot{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--f-mono);font-size:11px;opacity:.75}
+.dot i{width:100%;height:6px;border-radius:3px;background:currentColor;opacity:.25}
+.dot.done i{background:var(--accent);opacity:1}
+.dot.today{opacity:1;font-weight:700}
+.note{background:var(--accent-soft);border-radius:14px;padding:12px 14px;font-size:15px}
+.note .lbl{color:var(--accent)}
+.block{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.block-h{padding:14px 14px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.block-h p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.cnt{font-family:var(--f-mono);font-size:13px;color:var(--muted);white-space:nowrap}
+.item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.chk{appearance:none;width:26px;height:26px;border:2px solid var(--line);border-radius:8px;flex:none;cursor:pointer;display:grid;place-items:center;background:var(--surface)}
+.chk:checked{background:var(--ok);border-color:var(--ok)}
+.chk:checked::after{content:"";width:7px;height:12px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.chk:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.item-t{flex:1;min-width:0}
+.item-t span{display:block;color:var(--muted);font-size:13px}
+.item.is-done .item-t h3{text-decoration:line-through;color:var(--muted)}
+.how{border:0;background:none;color:var(--accent);font:600 14px var(--f-body);cursor:pointer;padding:6px 4px;flex:none}
+.plain{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px}
+.plain p{margin:6px 0 0;color:var(--muted)}
+.week{display:flex;flex-direction:column;gap:8px}
+.wrow{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.wrow.cur{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.wd{font-family:var(--f-mono);font-size:14px;font-weight:500;padding-top:1px}
+.wrow p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);margin-left:6px;vertical-align:1px}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:99px;padding:7px 14px;font:500 14px var(--f-body);cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.mv{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:4px;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.mv span{color:var(--muted);font-size:14px}
+.food{display:flex;flex-direction:column;gap:10px}
+.fcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px}
+.fcard p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.likes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.likes ul{margin:6px 0 0;padding-left:18px;font-size:14px}
+.rules{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+nav a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 10px;color:var(--muted);text-decoration:none;font-size:12px;font-weight:600}
+nav a svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+nav a[aria-current="page"]{color:var(--accent)}
+dialog{border:0;padding:0;width:min(560px,100%);max-height:88vh;margin:auto auto 0;border-radius:20px 20px 0 0;background:var(--surface);color:var(--fg)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.sheet{padding:20px max(18px,env(safe-area-inset-left,0px)) calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.sheet ol,.sheet ul{margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.dose{background:var(--accent-soft);border-radius:12px;padding:10px 12px}
+.close{align-self:flex-end;border:0;background:var(--bg);color:var(--fg);border-radius:99px;width:36px;height:36px;font-size:20px;cursor:pointer}
+.btn{margin-top:10px;width:100%;border:0;border-radius:12px;padding:12px;background:var(--accent);color:var(--accent-ink);font:600 15px var(--f-body);cursor:pointer}
+#reptext{margin-top:10px;width:100%;min-height:180px;border:1px solid var(--line);border-radius:10px;padding:10px;font:13px var(--f-mono);background:var(--bg);color:var(--fg)}
+.state{color:var(--muted);text-align:center;padding:40px 10px}
+@media (prefers-reduced-motion:no-preference){.item,.chk{transition:background .15s,border-color .15s}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header><h1>Турник <b>и Ко</b></h1><span class="wk" id="wk"></span></header>
+  <main id="app"><div class="state" id="state">Загружаю план от тренера…</div></main>
+</div>
+
+<nav aria-label="Разделы"><div class="in">
+  <a href="#today" data-v="today"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Сегодня</a>
+  <a href="#week" data-v="week"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Неделя</a>
+  <a href="#moves" data-v="moves"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 6v12M17 6v12M10 18h4"/></svg>Упражнения</a>
+  <a href="#food" data-v="food"><svg viewBox="0 0 24 24"><path d="M6 3v8a2 2 0 0 0 4 0V3M8 11v10M16 3c-2 2-2 6 0 8v10"/></svg>Еда</a>
+</div></nav>
+
+<dialog id="dlg"><div class="sheet" id="sheet"></div></dialog>
+
+<script>
+const WD=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
+const WDL=["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"];
+const S={plan:null,ex:{},food:[],foodInfo:null,log:{},filter:"Все",failed:false};
+try{S.log=JSON.parse(localStorage.getItem("trener-log")||"{}")}catch(e){S.log={}}
+function saveLog(){try{localStorage.setItem("trener-log",JSON.stringify(S.log))}catch(e){}}
+const $=s=>document.querySelector(s);
+const esc=t=>String(t??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+function weekIndex(d){const p=S.plan;if(!p||!p.startDate)return 0;const s=new Date(p.startDate+"T00:00:00");return Math.max(0,Math.floor((d-s)/(7*864e5)))}
+function monday(d){const x=new Date(d);x.setHours(0,0,0,0);const k=(x.getDay()+6)%7;x.setDate(x.getDate()-k);return x}
+function dayPlan(d){
+  const p=S.plan;const type=p.days[String(d.getDay())]||"rest";
+  if(type==="strength"){
+    const order=p.strengthOrder[weekIndex(d)%p.strengthOrder.length];
+    const n=[1,3,5].indexOf(d.getDay());const key=order[n<0?0:n];
+    return {type,title:p.sessions[key].title,sub:p.sessions[key].sub,blocks:[key,"posture"]};
+  }
+  const t=p.sessions[type]||{};return {type,title:t.title,sub:t.sub,blocks:t.blocks||[]};
+}
+function render(){
+  const v=(location.hash||"#today").slice(1);
+  document.querySelectorAll("nav a").forEach(a=>a.setAttribute("aria-current",a.dataset.v===v?"page":"false"));
+  if(!S.plan){$("#app").innerHTML=`<div class="state">${S.failed?"Не получилось загрузить план. Проверь интернет и открой приложение заново.":"Загружаю план от тренера…<br><small></small>"}</div>`;return}
+  $("#wk").textContent="Неделя "+(weekIndex(new Date())+1);
+  ({today:vToday,week:vWeek,moves:vMoves,food:vFood}[v]||vToday)();
+}
+function vToday(){
+  const d=new Date(),k=iso(d),dp=dayPlan(d),done=(S.log[k]&&S.log[k].done)||[];
+  const mon=monday(d);let dots="";
+  for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);const dk=iso(x);const has=S.log[dk]&&(S.log[dk].done||[]).length;dots+=`<div class="dot${has?" done":""}${dk===k?" today":""}"><i></i>${WD[x.getDay()]}</div>`}
+  let h=`<div class="stack"><section class="hero"><span class="lbl">${WDL[d.getDay()]}</span><h2>${esc(dp.title)}</h2><p>${esc(dp.sub||"")}</p><div class="dots">${dots}</div></section>`;
+  if(S.plan.note)h+=`<div class="note"><div class="lbl">Тренер пишет</div>${esc(S.plan.note)}</div>`;
+  for(const b of dp.blocks){
+    const s=S.plan.sessions[b];if(!s)continue;
+    if(!s.items||!s.items.length){h+=`<div class="plain"><h3>${esc(s.title)}</h3><p>${esc(s.sub||"")}</p></div>`;continue}
+    const c=s.items.filter(id=>done.includes(b+":"+id)).length;
+    h+=`<section class="block"><div class="block-h"><div><h3>${esc(s.title)}</h3>${s.sub?`<p>${esc(s.sub)}</p>`:""}</div><span class="cnt">${c}/${s.items.length}</span></div>`;
+    for(const id of s.items){const e=S.ex[id]||{name:id};const key=b+":"+id;const on=done.includes(key);
+      h+=`<div class="item${on?" is-done":""}"><input type="checkbox" class="chk" id="c-${esc(key)}" data-k="${esc(key)}" ${on?"checked":""} aria-label="Сделано: ${esc(e.name)}"><label class="item-t" for="c-${esc(key)}"><h3>${esc(e.name)}</h3><span>${esc(e.short||"")}</span></label><button class="how" data-ex="${esc(id)}">Как?</button></div>`}
+    h+=`</section>`;
+  }
+  $("#app").innerHTML=h+`</div>`;
+}
+function vWeek(){
+  const d=new Date(),mon=monday(d);let h=`<div class="stack"><div><span class="lbl">План на неделю ${weekIndex(d)+1}</span></div><div class="week">`;
+  for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);const dp=dayPlan(x);const dk=iso(x);const has=S.log[dk]&&(S.log[dk].done||[]).length;
+    h+=`<div class="wrow${dk===iso(d)?" cur":""}"><span class="wd">${WD[x.getDay()]} ${x.getDate()}</span><div><h3>${esc(dp.title)}${has?`<span class="tag ok">отмечено</span>`:""}</h3><p>${esc(dp.sub||"")}</p></div></div>`}
+  h+=`</div>`;
+  h+=`<div class="plain"><h3>Отчёт тренеру</h3><p>Скопируй и вставь в чат с тренером. Допиши, что было легко, что тяжело и что не понравилось.</p><button class="btn" id="rep">Скопировать отчёт за неделю</button><textarea id="reptext" readonly hidden aria-label="Текст отчёта"></textarea></div>`;
+  if(S.plan.weekTip)h+=`<div class="plain"><h3>Как дозировать нагрузку</h3><p>${esc(S.plan.weekTip)}</p></div>`;
+  $("#app").innerHTML=h+`</div>`;
+  $("#rep").onclick=copyReport;
+}
+function vMoves(){
+  const list=Object.entries(S.ex).sort((a,b)=>(a[1].order||0)-(b[1].order||0));
+  const groups=["Все",...new Set(list.map(([,e])=>e.group).filter(Boolean))];
+  let h=`<div class="stack"><div class="chips" role="group" aria-label="Группы">${groups.map(g=>`<button class="chip" data-g="${esc(g)}" aria-pressed="${g===S.filter}">${esc(g)}</button>`).join("")}</div>`;
+  if(!list.length)h+=`<div class="state">Упражнения скоро появятся.</div>`;
+  for(const [id,e] of list){if(S.filter!=="Все"&&e.group!==S.filter)continue;h+=`<button class="mv" data-ex="${esc(id)}"><span class="lbl">${esc(e.group||"")}</span><h3>${esc(e.name)}</h3><span>${esc(e.short||"")}</span></button>`}
+  $("#app").innerHTML=h+`</div>`;
+}
+function vFood(){
+  const fi=S.foodInfo||{};const meals=["Утренний перекус","Завтрак","Обед","Ужин","Если захотелось есть вечером"];
+  let h=`<div class="stack">`;
+  if(fi.rules&&fi.rules.length)h+=`<section class="plain"><h3>Главные правила</h3><ol class="rules" style="margin-top:8px">${fi.rules.map(r=>`<li>${esc(r)}</li>`).join("")}</ol></section>`;
+  if(fi.likes||fi.dislikes)h+=`<div class="likes"><div class="plain"><span class="lbl">Люблю</span><ul>${(fi.likes||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div><div class="plain"><span class="lbl">Не трогаем</span><ul>${(fi.dislikes||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>`;
+  for(const m of meals){const items=S.food.filter(f=>f.meal===m);if(!items.length)continue;
+    h+=`<section class="food"><h2>${esc(m)}</h2>${items.map(f=>`<div class="fcard"><h3>${esc(f.name)}</h3><p>${esc(f.what||"")}</p></div>`).join("")}</section>`}
+  if(!S.food.length)h+=`<div class="state">Идеи еды скоро появятся.</div>`;
+  $("#app").innerHTML=h+`</div>`;
+}
+function report(){
+  const d=new Date(),mon=monday(d);let t="Отчёт за неделю "+(weekIndex(d)+1)+"\n";
+  for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);if(x>d)break;const dp=dayPlan(x);const done=(S.log[iso(x)]&&S.log[iso(x)].done)||[];
+    const names=done.map(k=>{const id=k.split(":")[1];return (S.ex[id]||{name:id}).name});
+    t+="\n"+WD[x.getDay()]+" "+x.getDate()+" — "+dp.title+": "+(names.length?"сделал: "+[...new Set(names)].join(", "):"ничего не отмечено")}
+  return t+"\n\nЛегко было: \nТяжело было: \nНе понравилось: \n";
+}
+async function copyReport(){
+  const t=report(),ta=$("#reptext"),b=$("#rep");
+  try{await navigator.clipboard.writeText(t);b.textContent="Скопировано! Вставь в чат с тренером"}
+  catch(e){ta.hidden=false;ta.value=t;ta.focus();ta.select();b.textContent="Выдели текст ниже и скопируй"}
+}
+function openEx(id){
+  const e=S.ex[id];if(!e)return;
+  const li=a=>(a||[]).map(x=>`<li>${esc(x)}</li>`).join("");
+  $("#sheet").innerHTML=`<button class="close" aria-label="Закрыть" id="x">×</button><div><span class="lbl">${esc(e.group||"")}</span><h2 style="font-size:22px">${esc(e.name)}</h2></div><p style="margin:0;color:var(--muted)">${esc(e.short||"")}</p>${e.steps?`<div><h3>Как делать</h3><ol>${li(e.steps)}</ol></div>`:""}${e.dose?`<div class="dose"><span class="lbl">Сколько</span><div>${esc(e.dose)}</div></div>`:""}${e.mistakes?`<div><h3>Частые ошибки</h3><ul>${li(e.mistakes)}</ul></div>`:""}${e.easier?`<div><h3>Слишком тяжело?</h3><p style="margin:4px 0 0">${esc(e.easier)}</p></div>`:""}${e.harder?`<div><h3>Стало легко?</h3><p style="margin:4px 0 0">${esc(e.harder)}</p></div>`:""}`;
+  $("#x").onclick=()=>$("#dlg").close();$("#dlg").showModal();
+}
+document.addEventListener("click",ev=>{
+  const b=ev.target.closest("[data-ex]");if(b){ev.preventDefault();openEx(b.dataset.ex);return}
+  const g=ev.target.closest("[data-g]");if(g){S.filter=g.dataset.g;render()}
+});
+$("#dlg").addEventListener("click",ev=>{if(ev.target.id==="dlg")$("#dlg").close()});
+document.addEventListener("change",async ev=>{
+  const c=ev.target.closest(".chk");if(!c)return;
+  const k=iso(new Date());const cur=new Set((S.log[k]&&S.log[k].done)||[]);
+  c.checked?cur.add(c.dataset.k):cur.delete(c.dataset.k);
+  S.log[k]={done:[...cur]};saveLog();render();
+});
+window.addEventListener("hashchange",render);
+render();
+(async()=>{
+  try{const r=await fetch("data.json",{cache:"no-cache"});const d=await r.json();
+    S.plan=d.plan;S.ex=d.exercises;S.food=d.meals.sort((a,b)=>a.order-b.order);S.foodInfo=d.food;S.failed=false}
+  catch(e){S.failed=true}
+  render();
+})();
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
+</script>
+
+</body>
+</html>
