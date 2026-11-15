@@ -105,6 +105,11 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 .rec summary{list-style:none;cursor:pointer}.rec summary::-webkit-details-marker{display:none}
 .rec summary h3::after{content:" ›";color:var(--accent)}.rec[open] summary h3::after{content:" ⌄"}
 .rec ol{margin:10px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+.item-t label{display:block;cursor:pointer}
+.stp{display:flex;align-items:center;gap:8px;margin-top:8px}
+.sb{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:600 20px var(--f-body);cursor:pointer;line-height:1}
+.sn{min-width:24px;text-align:center;font:500 16px var(--f-mono)}
+.sl{font-size:12px;color:var(--muted);font-style:normal}
 .state{color:var(--muted);text-align:center;padding:40px 10px}
 @media (prefers-reduced-motion:no-preference){.item,.chk{transition:background .15s,border-color .15s}}
 </style>
@@ -152,10 +157,13 @@ function render(){
   $("#wk").textContent="Неделя "+(weekIndex(new Date())+1);
   ({today:vToday,week:vWeek,moves:vMoves,food:vFood}[v]||vToday)();
 }
+function act(k){const l=S.log[k];return !!(l&&((l.done||[]).length||Object.keys(l.sets||{}).length))}
+function stepper(key,name,n){return `<div class="stp"><button class="sb" data-sm="${esc(key)}" aria-label="Минус подход: ${esc(name)}">−</button><b class="sn" aria-live="polite">${n}</b><button class="sb" data-sp="${esc(key)}" aria-label="Плюс подход: ${esc(name)}">+</button><i class="sl">подходов</i></div>`}
+function bumpSet(key,delta){const k=iso(new Date());const cur=S.log[k]||{};const sets={...(cur.sets||{})};const n=Math.max(0,Math.min(30,(sets[key]||0)+delta));if(n)sets[key]=n;else delete sets[key];S.log[k]={...cur,done:cur.done||[],sets};saveLog();render()}
 function vToday(){
-  const d=new Date(),k=iso(d),dp=dayPlan(d),done=(S.log[k]&&S.log[k].done)||[];
+  const d=new Date(),k=iso(d),dp=dayPlan(d),done=(S.log[k]&&S.log[k].done)||[],sets=(S.log[k]&&S.log[k].sets)||{};
   const mon=monday(d);let dots="";
-  for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);const dk=iso(x);const has=S.log[dk]&&(S.log[dk].done||[]).length;dots+=`<div class="dot${has?" done":""}${dk===k?" today":""}"><i></i>${WD[x.getDay()]}</div>`}
+  for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);const dk=iso(x);const has=act(dk);dots+=`<div class="dot${has?" done":""}${dk===k?" today":""}"><i></i>${WD[x.getDay()]}</div>`}
   let h=`<div class="stack"><section class="hero"><span class="lbl">${WDL[d.getDay()]}</span><h2>${esc(dp.title)}</h2><p>${esc(dp.sub||"")}</p><div class="dots">${dots}</div></section>`;
   if(S.plan.note)h+=`<div class="note"><div class="lbl">Тренер пишет</div>${esc(S.plan.note)}</div>`;
   for(const b of dp.blocks){
@@ -164,14 +172,14 @@ function vToday(){
     const c=s.items.filter(id=>done.includes(b+":"+id)).length;
     h+=`<section class="block"><div class="block-h"><div><h3>${esc(s.title)}</h3>${s.sub?`<p>${esc(s.sub)}</p>`:""}</div><span class="cnt">${c}/${s.items.length}</span></div>`;
     for(const id of s.items){const e=S.ex[id]||{name:id};const key=b+":"+id;const on=done.includes(key);
-      h+=`<div class="item${on?" is-done":""}"><input type="checkbox" class="chk" id="c-${esc(key)}" data-k="${esc(key)}" ${on?"checked":""} aria-label="Сделано: ${esc(e.name)}"><label class="item-t" for="c-${esc(key)}"><h3>${esc(e.name)}</h3><span>${esc(e.short||"")}</span></label><button class="how" data-ex="${esc(id)}">Как?</button></div>`}
+      h+=`<div class="item${on?" is-done":""}"><input type="checkbox" class="chk" id="c-${esc(key)}" data-k="${esc(key)}" ${on?"checked":""} aria-label="Сделано: ${esc(e.name)}"><div class="item-t"><label for="c-${esc(key)}"><h3>${esc(e.name)}</h3><span>${esc(e.short||"")}</span></label>${s.sets?stepper(key,e.name,sets[key]||0):""}</div><button class="how" data-ex="${esc(id)}">Как?</button></div>`}
     h+=`</section>`;
   }
   $("#app").innerHTML=h+`</div>`;
 }
 function vWeek(){
   const d=new Date(),mon=monday(d);let h=`<div class="stack"><div><span class="lbl">План на неделю ${weekIndex(d)+1}</span></div><div class="week">`;
-  for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);const dp=dayPlan(x);const dk=iso(x);const has=S.log[dk]&&(S.log[dk].done||[]).length;
+  for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);const dp=dayPlan(x);const dk=iso(x);const has=act(dk);
     h+=`<div class="wrow${dk===iso(d)?" cur":""}"><span class="wd">${WD[x.getDay()]} ${x.getDate()}</span><div><h3>${esc(dp.title)}${has?`<span class="tag ok">отмечено</span>`:""}</h3><p>${esc(dp.sub||"")}</p></div></div>`}
   h+=`</div>`;
   h+=`<div class="plain"><h3>Отчёт тренеру</h3><p>Скопируй и вставь в чат с тренером. Допиши, что было легко, что тяжело и что не понравилось.</p><button class="btn" id="rep">Скопировать отчёт за неделю</button><textarea id="reptext" readonly hidden aria-label="Текст отчёта"></textarea></div>`;
@@ -203,8 +211,9 @@ function vFood(){
 }
 function report(){
   const d=new Date(),mon=monday(d);let t="Отчёт за неделю "+(weekIndex(d)+1)+"\n";
-  for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);if(x>d)break;const dp=dayPlan(x);const done=(S.log[iso(x)]&&S.log[iso(x)].done)||[];
-    const names=done.map(k=>{const id=k.split(":")[1];return (S.ex[id]||{name:id}).name});
+  for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);if(x>d)break;const dp=dayPlan(x);const lg=S.log[iso(x)]||{};const sts=lg.sets||{};
+    const keys=[...new Set([...(lg.done||[]),...Object.keys(sts)])];
+    const names=keys.map(k=>{const id=k.split(":")[1];const nm=(S.ex[id]||{name:id}).name;return sts[k]?nm+" ("+sts[k]+" подх.)":nm});
     t+="\n"+WD[x.getDay()]+" "+x.getDate()+" — "+dp.title+": "+(names.length?"сделал: "+[...new Set(names)].join(", "):"ничего не отмечено")}
   return t+"\n\nЛегко было: \nТяжело было: \nНе понравилось: \n";
 }
@@ -221,6 +230,7 @@ function openEx(id){
 }
 document.addEventListener("click",ev=>{
   const b=ev.target.closest("[data-ex]");if(b){ev.preventDefault();openEx(b.dataset.ex);return}
+  const sp=ev.target.closest("[data-sp],[data-sm]");if(sp){bumpSet(sp.dataset.sp||sp.dataset.sm,sp.dataset.sp?1:-1);return}
   const g=ev.target.closest("[data-g]");if(g){S.filter=g.dataset.g;render()}
 });
 $("#dlg").addEventListener("click",ev=>{if(ev.target.id==="dlg")$("#dlg").close()});
@@ -228,7 +238,7 @@ document.addEventListener("change",async ev=>{
   const c=ev.target.closest(".chk");if(!c)return;
   const k=iso(new Date());const cur=new Set((S.log[k]&&S.log[k].done)||[]);
   c.checked?cur.add(c.dataset.k):cur.delete(c.dataset.k);
-  S.log[k]={done:[...cur]};saveLog();render();
+  S.log[k]={...(S.log[k]||{}),done:[...cur]};saveLog();render();
 });
 window.addEventListener("hashchange",render);
 render();
