@@ -59,7 +59,6 @@
      "thoracic",
      "chin",
      "angel",
-     "band_pullapart",
      "door"
     ]
    },
@@ -85,6 +84,7 @@
     "sub": "Зарядка дома вместо обязательной прогулки",
     "blocks": [
      "cardio",
+     "expander",
      "walkout",
      "posture",
      "roller"
@@ -126,6 +126,13 @@
      "jacks",
      "shadow",
      "squat"
+    ]
+   },
+   "expander": {
+    "title": "Эспандер: спина и осанка",
+    "sub": "Только в дни зарядки",
+    "items": [
+     "band_pullapart"
     ]
    }
   }
@@ -748,7 +755,7 @@
    "what": "Лёгкий вариант."
   }
  ],
- "version": "2026-11-17",
+ "version": "2026-11-17b",
  "recipes": [
   {
    "meal": "Завтрак",
