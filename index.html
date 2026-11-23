@@ -98,6 +98,7 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 .sheet{padding:20px max(18px,env(safe-area-inset-left,0px)) calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
 .sheet ol,.sheet ul{margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 .dose{background:var(--accent-soft);border-radius:12px;padding:10px 12px}
+.tmr{background:var(--accent-soft);border-radius:12px;padding:10px 12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}.tmr b{font:700 28px var(--f-body);min-width:64px;font-variant-numeric:tabular-nums}.tb{border:1px solid var(--accent);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;font:600 14px var(--f-body);cursor:pointer}.tb.on{background:var(--accent);color:var(--accent-ink)}.tmr.end{background:var(--ok-soft)}
 .close{align-self:flex-end;border:0;background:var(--bg);color:var(--fg);border-radius:99px;width:36px;height:36px;font-size:20px;cursor:pointer}
 .btn{margin-top:10px;width:100%;border:0;border-radius:12px;padding:12px;background:var(--accent);color:var(--accent-ink);font:600 15px var(--f-body);cursor:pointer}
 #reptext{margin-top:10px;width:100%;min-height:180px;border:1px solid var(--line);border-radius:10px;padding:10px;font:13px var(--f-mono);background:var(--bg);color:var(--fg)}
@@ -227,11 +228,18 @@ async function copyReport(back){
   try{await navigator.clipboard.writeText(t);b.textContent="Скопировано! Вставь в чат с тренером"}
   catch(e){ta.hidden=false;ta.value=t;ta.focus();ta.select();b.textContent="Выдели текст ниже и скопируй"}
 }
+let TM=null;
+function fmt(n){return Math.floor(n/60)+":"+String(n%60).padStart(2,"0")}
+function beep(){try{const a=new (window.AudioContext||window.webkitAudioContext)();[0,.25,.5].forEach(t=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=880;g.gain.value=.2;o.connect(g);g.connect(a.destination);o.start(a.currentTime+t);o.stop(a.currentTime+t+.15)});setTimeout(()=>a.close(),1200)}catch(e){}try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
+function stopTimer(reset){if(TM){clearInterval(TM.id);if(TM.btn){TM.btn.classList.remove("on");TM.btn.textContent=TM.lbl}TM=null}const t=$("#tmr");if(t)t.classList.remove("end");if(reset&&$("#tv"))$("#tv").textContent="0:00"}
+function startTimer(sec,btn){stopTimer();const v=$("#tv"),box=$("#tmr");if(!v)return;let left=sec;v.textContent=fmt(left);const lbl=btn.textContent;btn.classList.add("on");btn.textContent="⏱ "+left+" с";
+  TM={btn,lbl,id:setInterval(()=>{left--;v.textContent=fmt(Math.max(0,left));btn.textContent="⏱ "+Math.max(0,left)+" с";if(left<=0){stopTimer();box.classList.add("end");v.textContent="Всё!";beep()}},1000)}}
 function openEx(id){
   const e=S.ex[id];if(!e)return;
   const li=a=>(a||[]).map(x=>`<li>${esc(x)}</li>`).join("");
-  $("#sheet").innerHTML=`<button class="close" aria-label="Закрыть" id="x">×</button><div><span class="lbl">${esc(e.group||"")}</span><h2 style="font-size:22px">${esc(e.name)}</h2></div><p style="margin:0;color:var(--muted)">${esc(e.short||"")}</p>${e.steps?`<div><h3>Как делать</h3><ol>${li(e.steps)}</ol></div>`:""}${e.dose?`<div class="dose"><span class="lbl">Сколько</span><div>${esc(e.dose)}</div></div>`:""}${e.mistakes?`<div><h3>Частые ошибки</h3><ul>${li(e.mistakes)}</ul></div>`:""}${e.easier?`<div><h3>Слишком тяжело?</h3><p style="margin:4px 0 0">${esc(e.easier)}</p></div>`:""}${e.harder?`<div><h3>Стало легко?</h3><p style="margin:4px 0 0">${esc(e.harder)}</p></div>`:""}${e.video?`<a class="btn vid" href="${esc(e.video)}" target="_blank" rel="noopener">▶ Смотреть видео на YouTube</a>`:""}`;
+  $("#sheet").innerHTML=`<button class="close" aria-label="Закрыть" id="x">×</button><div><span class="lbl">${esc(e.group||"")}</span><h2 style="font-size:22px">${esc(e.name)}</h2></div><p style="margin:0;color:var(--muted)">${esc(e.short||"")}</p>${e.steps?`<div><h3>Как делать</h3><ol>${e.timer?e.steps.map((x,i)=>{const t=(e.stepTimers||[])[i];return `<li>${esc(x)}${t?` <button class="tb" data-t="${t}">▶ ${t} с</button>`:""}</li>`}).join(""):li(e.steps)}</ol></div>`:""}${e.timer?`<div class="tmr" id="tmr"><b id="tv">0:${String(e.timer).padStart(2,"0")}</b>${[15,30,60].map(t=>`<button class="tb" data-t="${t}">${t<60?t+" с":"1 мин"}</button>`).join("")}<button class="tb" id="tstop">Стоп</button></div>`:""}${e.dose?`<div class="dose"><span class="lbl">Сколько</span><div>${esc(e.dose)}</div></div>`:""}${e.mistakes?`<div><h3>Частые ошибки</h3><ul>${li(e.mistakes)}</ul></div>`:""}${e.easier?`<div><h3>Слишком тяжело?</h3><p style="margin:4px 0 0">${esc(e.easier)}</p></div>`:""}${e.harder?`<div><h3>Стало легко?</h3><p style="margin:4px 0 0">${esc(e.harder)}</p></div>`:""}${e.video?`<a class="btn vid" href="${esc(e.video)}" target="_blank" rel="noopener">▶ Смотреть видео на YouTube</a>`:""}`;
   $("#x").onclick=()=>$("#dlg").close();$("#dlg").showModal();
+  if(e.timer){$("#sheet").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>startTimer(+b.dataset.t,b));$("#tstop").onclick=()=>stopTimer(true)}
 }
 document.addEventListener("click",ev=>{
   const b=ev.target.closest("[data-ex]");if(b){ev.preventDefault();openEx(b.dataset.ex);return}
@@ -239,6 +247,7 @@ document.addEventListener("click",ev=>{
   const g=ev.target.closest("[data-g]");if(g){S.filter=g.dataset.g;render()}
 });
 $("#dlg").addEventListener("click",ev=>{if(ev.target.id==="dlg")$("#dlg").close()});
+$("#dlg").addEventListener("close",()=>stopTimer());
 document.addEventListener("change",async ev=>{
   const c=ev.target.closest(".chk");if(!c)return;
   const k=iso(new Date());const cur=new Set((S.log[k]&&S.log[k].done)||[]);
