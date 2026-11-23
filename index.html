@@ -147,10 +147,10 @@ function dayPlan(d){
     const order=p.strengthOrder[weekIndex(d)%p.strengthOrder.length];
     const n=[1,3,5].indexOf(d.getDay());const key=order[n<0?0:n];
     const lg=S.log[iso(d)]||{};const qk=key+"_quick";
-    if(lg.quick&&p.sessions[qk])return {type,quick:true,canQuick:true,title:p.sessions[qk].title,sub:p.sessions[qk].sub,blocks:[qk,"posture"]};
-    return {type,canQuick:!!p.sessions[qk],title:p.sessions[key].title,sub:p.sessions[key].sub,blocks:[key,"posture"]};
+    if(lg.quick&&p.sessions[qk])return {type,quick:true,canQuick:true,title:p.sessions[qk].title,sub:p.sessions[qk].sub,blocks:[qk,"posture",...(p.daily||[])]};
+    return {type,canQuick:!!p.sessions[qk],title:p.sessions[key].title,sub:p.sessions[key].sub,blocks:[key,"posture",...(p.daily||[])]};
   }
-  const t=p.sessions[type]||{};return {type,title:t.title,sub:t.sub,blocks:t.blocks||[]};
+  const t=p.sessions[type]||{};return {type,title:t.title,sub:t.sub,blocks:[...(t.blocks||[]),...(p.daily||[])]};
 }
 function render(){
   const v=(location.hash||"#today").slice(1);
