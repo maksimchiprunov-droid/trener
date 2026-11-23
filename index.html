@@ -182,10 +182,10 @@ function vWeek(){
   for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);const dp=dayPlan(x);const dk=iso(x);const has=act(dk);
     h+=`<div class="wrow${dk===iso(d)?" cur":""}"><span class="wd">${WD[x.getDay()]} ${x.getDate()}</span><div><h3>${esc(dp.title)}${has?`<span class="tag ok">отмечено</span>`:""}</h3><p>${esc(dp.sub||"")}</p></div></div>`}
   h+=`</div>`;
-  h+=`<div class="plain"><h3>Отчёт тренеру</h3><p>Скопируй и вставь в чат с тренером. Допиши, что было легко, что тяжело и что не понравилось.</p><button class="btn" id="rep">Скопировать отчёт за неделю</button><textarea id="reptext" readonly hidden aria-label="Текст отчёта"></textarea></div>`;
+  h+=`<div class="plain"><h3>Отчёт тренеру</h3><p>Скопируй и вставь в чат с тренером. Допиши, что было легко, что тяжело и что не понравилось.</p><button class="btn" id="rep">Скопировать отчёт за неделю</button><button class="btn" id="repPrev" style="margin-top:8px;background:transparent;color:inherit;border:1px solid currentColor">Отчёт за прошлую неделю</button><textarea id="reptext" readonly hidden aria-label="Текст отчёта"></textarea></div>`;
   if(S.plan.weekTip)h+=`<div class="plain"><h3>Как дозировать нагрузку</h3><p>${esc(S.plan.weekTip)}</p></div>`;
   $("#app").innerHTML=h+`</div>`;
-  $("#rep").onclick=copyReport;
+  $("#rep").onclick=()=>copyReport(0);$("#repPrev").onclick=()=>copyReport(1);
 }
 function vMoves(){
   const list=Object.entries(S.ex).sort((a,b)=>(a[1].order||0)-(b[1].order||0));
@@ -209,16 +209,17 @@ function vFood(){
   if(!S.food.length)h+=`<div class="state">Идеи еды скоро появятся.</div>`;
   $("#app").innerHTML=h+`</div>`;
 }
-function report(){
-  const d=new Date(),mon=monday(d);let t="Отчёт за неделю "+(weekIndex(d)+1)+"\n";
+function report(back){
+  const now=new Date();let d=now,mon=monday(now);if(back){mon=new Date(mon);mon.setDate(mon.getDate()-7*back);d=new Date(mon);d.setDate(mon.getDate()+6);d.setHours(23,59,59)}
+  let t="Отчёт за неделю "+(weekIndex(mon)+1)+"\n";
   for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);if(x>d)break;const dp=dayPlan(x);const lg=S.log[iso(x)]||{};const sts=lg.sets||{};
     const keys=[...new Set([...(lg.done||[]),...Object.keys(sts)])];
     const names=keys.map(k=>{const id=k.split(":")[1];const nm=(S.ex[id]||{name:id}).name;return sts[k]?nm+" ("+sts[k]+" подх.)":nm});
     t+="\n"+WD[x.getDay()]+" "+x.getDate()+" — "+dp.title+": "+(names.length?"сделал: "+[...new Set(names)].join(", "):"ничего не отмечено")}
   return t+"\n\nЛегко было: \nТяжело было: \nНе понравилось: \n";
 }
-async function copyReport(){
-  const t=report(),ta=$("#reptext"),b=$("#rep");
+async function copyReport(back){
+  const t=report(back),ta=$("#reptext"),b=$(back?"#repPrev":"#rep");
   try{await navigator.clipboard.writeText(t);b.textContent="Скопировано! Вставь в чат с тренером"}
   catch(e){ta.hidden=false;ta.value=t;ta.focus();ta.select();b.textContent="Выдели текст ниже и скопируй"}
 }
